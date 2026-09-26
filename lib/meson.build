@@ -2,6 +2,7 @@ config_vapi = meson.get_compiler('vala').find_library('config', dirs: meson.curr
 
 config_data = configuration_data()
 config_data.set_quoted('PLUGS_DIR', plugs_dir)
+config_data.set_quoted('LIB_DIR', get_option('libdir'))
 
 config_header = configure_file(
     configuration: config_data,
