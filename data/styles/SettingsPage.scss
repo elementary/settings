@@ -25,15 +25,19 @@ settingspage {
     }
 
     .header-area {
+        header {
+            margin: 0;
+        }
+
         // avatar is inside of a widget
         widget {
             &:dir(ltr) {
                 margin-left: rem(4px);
-                margin-right: rem(9px);
+                margin-right: rem(3px);
             }
 
             &:dir(rtl) {
-                margin-left: rem(9px);
+                margin-left: rem(3px);
                 margin-right: rem(4px);
             }
         }
@@ -44,23 +48,13 @@ settingspage {
             &:dir(ltr) {
                 // Match square icon canvas whitespace at 48px
                 margin-left: rem(-4px);
-                margin-right: rem(7px);
+                margin-right: rem(1px);
             }
 
             &:dir(rtl) {
-                margin-left: rem(7px);
+                margin-left: rem(1px);
                 margin-right: rem(-4px);
             }
-        }
-
-        label.title-2 {
-            font-weight: 600;
-            font-size: 2rem;
-        }
-
-        label:not(.title-2) {
-            font-size: 0.95rem;
-            opacity: 0.85;
         }
 
         switch {
@@ -68,14 +62,6 @@ settingspage {
                 // Match font size for title
                 min-height: 2rem;
                 min-width: 2rem;
-            }
-
-            &:dir(ltr) {
-                margin-left: rem(12px);
-            }
-
-            &:dir(rtl) {
-                margin-right: rem(12px);
             }
         }
     }
