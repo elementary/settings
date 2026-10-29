@@ -104,6 +104,10 @@ public class Switchboard.CategoryView : Adw.NavigationPage {
             search_box.sensitive = false;
         }
 
+        searchview.row_activated.connect (() => {
+            search_box.text = "";
+        });
+
         search_box.search_changed.connect (() => {
             if (search_box.text.length > 0) {
                 stack.visible_child = searchview;

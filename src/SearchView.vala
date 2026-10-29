@@ -18,6 +18,8 @@
 */
 
 public class Switchboard.SearchView : Granite.Bin {
+    public signal void row_activated ();
+
     private string _query = "";
     public string query {
         get {
@@ -78,7 +80,7 @@ public class Switchboard.SearchView : Granite.Bin {
                 Switchboard.PlugsManager.get_default ()
             );
 
-            query = "";
+            row_activated ();
         });
     }
 
