@@ -18,23 +18,41 @@
 */
 
 public class Switchboard.SearchView : Granite.Bin {
-    public Gtk.SearchEntry search_entry { get; construct; }
+    private string _query = "";
+    public string query {
+        get {
+            return _query;
+        }
+        set {
+            Gtk.FilterChange filter_change = DIFFERENT;
+            if (value.has_prefix (query)) {
+                filter_change = MORE_STRICT;
+            }
+
+            _query = value;
+
+            alert_view.title = _("No Results for “%s”").printf (query);
+
+            filter_model.filter.changed (filter_change);
+            listbox.invalidate_sort ();
+            listbox.select_row (null);
+        }
+    }
+
+    private Granite.Placeholder alert_view;
     private Gtk.ListBox listbox;
+    private Gtk.FilterListModel filter_model;
 
     private ListStore list_store;
-
-    public SearchView (Gtk.SearchEntry search_entry) {
-        Object (search_entry: search_entry);
-    }
 
     construct {
         list_store = new ListStore (typeof (SearchRow));
 
-        var filter_model = new Gtk.FilterListModel (list_store, new Gtk.CustomFilter (filter_func)) {
+        filter_model = new Gtk.FilterListModel (list_store, new Gtk.CustomFilter (filter_func)) {
             incremental = true
         };
 
-        var alert_view = new Granite.Placeholder ("") {
+        alert_view = new Granite.Placeholder ("") {
             description = _("Try changing search terms."),
             icon = new ThemedIcon ("edit-find-symbolic")
         };
@@ -54,23 +72,13 @@ public class Switchboard.SearchView : Granite.Bin {
 
         load_plugs.begin ();
 
-        search_entry.search_changed.connect (() => {
-            alert_view.title = _("No Results for “%s”").printf (search_entry.text);
-
-            if (search_entry.text.length > 0) {
-                filter_model.filter.changed (DIFFERENT);
-                listbox.invalidate_sort ();
-                listbox.select_row (null);
-            }
-        });
-
         listbox.row_activated.connect ((row) => {
             app.load_setting_path (
                 ((SearchRow) row).uri.replace ("settings://", ""),
                 Switchboard.PlugsManager.get_default ()
             );
 
-            search_entry.text = "";
+            query = "";
         });
     }
 
@@ -79,21 +87,21 @@ public class Switchboard.SearchView : Granite.Bin {
     }
 
     private bool filter_func (Object object) {
-        var search_text = search_entry.text;
+        var search_text = query;
         if (search_text == "" || search_text == null) {
             return true;
         }
 
         bool valid = search_text.match_string (((SearchRow) object).last_item, true);
         if (valid) {
-            ((SearchRow) object).pattern = search_entry.text;
+            ((SearchRow) object).pattern = query;
         }
 
         return valid;
     }
 
     private int sort_func (Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
-        var search_text = search_entry.text.down ();
+        var search_text = query.down ();
         var row1_label = ((SearchRow) row1).last_item.down ();
         var row2_label = ((SearchRow) row2).last_item.down ();
 
