@@ -41,7 +41,7 @@ public class Switchboard.CategoryView : Adw.NavigationPage {
             title_widget = search_clamp
         };
 
-        var searchview = new SearchView (search_box);
+        var searchview = new SearchView ();
 
         var alert_view = new Granite.Placeholder (_("No Settings Found")) {
             description = _("Install settings plugins and re-launch System Settings."),
@@ -103,9 +103,14 @@ public class Switchboard.CategoryView : Adw.NavigationPage {
             search_box.sensitive = false;
         }
 
+        searchview.row_activated.connect (() => {
+            search_box.text = "";
+        });
+
         search_box.search_changed.connect (() => {
             if (search_box.text.length > 0) {
                 stack.visible_child = searchview;
+                searchview.query = search_box.text;
             } else {
                 stack.visible_child = category_box;
             }
