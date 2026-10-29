@@ -89,12 +89,11 @@ public class Switchboard.SearchView : Granite.Bin {
     }
 
     private bool filter_func (Object object) {
-        var search_text = query;
-        if (search_text == "" || search_text == null) {
+        if (query == "" || query == null) {
             return true;
         }
 
-        bool valid = search_text.match_string (((SearchRow) object).last_item, true);
+        bool valid = query.match_string (((SearchRow) object).last_item, true);
         if (valid) {
             ((SearchRow) object).pattern = query;
         }
