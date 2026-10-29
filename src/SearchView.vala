@@ -17,15 +17,19 @@
 * Boston, MA 02110-1301 USA.
 */
 
-public class Switchboard.SearchView : Gtk.Box {
+public class Switchboard.SearchView : Granite.Bin {
     public Gtk.SearchEntry search_entry { get; construct; }
     private Gtk.ListBox listbox;
+
+    private ListStore list_store;
 
     public SearchView (Gtk.SearchEntry search_entry) {
         Object (search_entry: search_entry);
     }
 
     construct {
+        list_store = new ListStore (typeof (SearchRow));
+
         var alert_view = new Granite.Placeholder ("") {
             description = _("Try changing search terms."),
             icon = new ThemedIcon ("edit-find-symbolic")
@@ -36,13 +40,14 @@ public class Switchboard.SearchView : Gtk.Box {
         listbox = new Gtk.ListBox () {
             selection_mode = BROWSE
         };
-        // listbox.add_css_class (Granite.STYLE_CLASS_BACKGROUND);
-        // listbox.add_css_class (Granite.STYLE_CLASS_RICH_LIST);
+        listbox.bind_model (list_store, (obj) => (SearchRow) obj);
+        listbox.add_css_class (Granite.STYLE_CLASS_BACKGROUND);
+        listbox.add_css_class (Granite.STYLE_CLASS_RICH_LIST);
         listbox.set_filter_func (filter_func);
         listbox.set_sort_func (sort_func);
         listbox.set_placeholder (alert_view);
 
-        append (listbox);
+        child = listbox;
 
         load_plugs.begin ();
 
@@ -115,7 +120,7 @@ public class Switchboard.SearchView : Gtk.Box {
                 plug.display_name,
                 uri
             );
-            listbox.append (search_row);
+            list_store.append (search_row);
 
             // Using search to get sub settings
             var search_results = yield plug.search ("");
@@ -140,7 +145,7 @@ public class Switchboard.SearchView : Gtk.Box {
                     title,
                     (owned) sub_uri
                 );
-                listbox.append (search_row);
+                list_store.append (search_row);
             }
         }
     }
