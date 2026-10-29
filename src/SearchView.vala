@@ -30,6 +30,10 @@ public class Switchboard.SearchView : Granite.Bin {
     construct {
         list_store = new ListStore (typeof (SearchRow));
 
+        var filter_model = new Gtk.FilterListModel (list_store, new Gtk.CustomFilter (filter_func)) {
+            incremental = true
+        };
+
         var alert_view = new Granite.Placeholder ("") {
             description = _("Try changing search terms."),
             icon = new ThemedIcon ("edit-find-symbolic")
@@ -40,10 +44,9 @@ public class Switchboard.SearchView : Granite.Bin {
         listbox = new Gtk.ListBox () {
             selection_mode = BROWSE
         };
-        listbox.bind_model (list_store, (obj) => (SearchRow) obj);
+        listbox.bind_model (filter_model, (obj) => (SearchRow) obj);
         listbox.add_css_class (Granite.STYLE_CLASS_BACKGROUND);
         listbox.add_css_class (Granite.STYLE_CLASS_RICH_LIST);
-        listbox.set_filter_func (filter_func);
         listbox.set_sort_func (sort_func);
         listbox.set_placeholder (alert_view);
 
@@ -55,7 +58,7 @@ public class Switchboard.SearchView : Granite.Bin {
             alert_view.title = _("No Results for “%s”").printf (search_entry.text);
 
             if (search_entry.text.length > 0) {
-                listbox.invalidate_filter ();
+                filter_model.filter.changed (DIFFERENT);
                 listbox.invalidate_sort ();
                 listbox.select_row (null);
             }
@@ -75,15 +78,15 @@ public class Switchboard.SearchView : Granite.Bin {
         listbox.get_row_at_y (0).activate ();
     }
 
-    private bool filter_func (Gtk.ListBoxRow listbox_row) {
+    private bool filter_func (Object object) {
         var search_text = search_entry.text;
         if (search_text == "" || search_text == null) {
             return true;
         }
 
-        bool valid = search_text.down () in ((SearchRow) listbox_row).last_item.down ();
+        bool valid = search_text.down () in ((SearchRow) object).last_item.down ();
         if (valid) {
-            ((SearchRow) listbox_row).pattern = search_entry.text;
+            ((SearchRow) object).pattern = search_entry.text;
         }
 
         return valid;
