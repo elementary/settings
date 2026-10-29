@@ -84,7 +84,7 @@ public class Switchboard.SearchView : Granite.Bin {
             return true;
         }
 
-        bool valid = search_text.down () in ((SearchRow) object).last_item.down ();
+        bool valid = search_text.match_string (((SearchRow) object).last_item, true);
         if (valid) {
             ((SearchRow) object).pattern = search_entry.text;
         }
