@@ -1,6 +1,5 @@
 settingssidebar {
     list {
-        background: inherit;
         min-width: rem(200px);
 
         row,
@@ -8,62 +7,39 @@ settingssidebar {
             padding: rem(6px);
         }
 
-        row {
-            overlay {
-                // IconSize.LARGE + padding
-                min-width: calc(32px + #{rem(6px)});
-            }
-
-            overlay:dir(ltr) {
-                margin-right: rem(6px);
-            }
-
-            overlay:dir(rtl) {
-                margin-left: rem(6px);
-            }
+        row overlay {
+            // IconSize.LARGE + padding
+            min-width: calc(32px + 0.5rem);
         }
     }
 
     toolbarview {
         revealer.bottom-bar {
-            color: #{'mix(@text_color, @insensitive_bg_color, 0.15)'};
+            color: color-mix(in oklab, var(--fg-color) 85%, var(--bg-level-3));
 
             &.raised {
-                box-shadow: 0 -1px #{'alpha(@highlight_color, 0.2)'};
-                background-color: rgba(black, 0.01);
+                box-shadow: 0 -1px color-mix(in srgb, var(--highlight-color) 20%, transparent);
+                background-color: color-mix(in srgb, black 1%, transparent);
                 background-image:
                     linear-gradient(
                         to bottom,
-                        #{'@borders'} 1px,
-                        rgba(black, 0.07) 1px,
-                        transparent rem(3px)
+                        var(--border-color) 1px,
+                        color-mix(in srgb, black 7%, transparent) 1px,
+                        transparent 0.25rem
                     );
             }
 
             &.raised.border {
-                background: rgba(black, 0.03);
+                background: color-mix(in srgb, black 3%, transparent);
                 box-shadow:
-                    0 -1px #{'@borders'},
-                    inset 0 1px #{'alpha(@highlight_color, 0.3)'};
+                    0 -1px var(--border-color),
+                    inset 0 1px color-mix(in srgb, var(--highlight-color) 30%, transparent);
             }
 
             actionbar {
-                padding: rem(6px);
-
                 box.start > label {
-                    margin: rem(6px);
+                    margin: 0.5rem;
                     font-weight: 500;
-                }
-
-                box.end > switch {
-                    slider,
-                    trough {
-                         min-height: 1.5em;
-                    }
-
-                    slider {
-                         min-width: 1.5em;
-                    }
                 }
             }
         }

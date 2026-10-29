@@ -27,35 +27,15 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
     }
 
     public string? header { get; set; }
+    public string? status { get; set; }
+    public string title { get; set; }
 
     public unowned SettingsPage page { get; construct; }
 
     public Icon icon { get; set; }
 
-    public string status {
-        set {
-            status_label.label = value;
-            status_label.visible = true;
-            update_property (Gtk.AccessibleProperty.DESCRIPTION, value, -1);
-        }
-    }
-
-    public string title {
-        get {
-            return _title;
-        }
-        set {
-            _title = value;
-            title_label.label = value;
-            update_property (Gtk.AccessibleProperty.LABEL, value, -1);
-        }
-    }
-
     private Gtk.Widget display_widget;
     private Gtk.Image status_icon;
-    private Gtk.Label status_label;
-    private Gtk.Label title_label;
-    private string _title;
 
     public SettingsSidebarRow (SettingsPage page) {
         Object (
@@ -64,26 +44,18 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
     }
 
     construct {
-        title_label = new Gtk.Label (page.title) {
-            ellipsize = Pango.EllipsizeMode.END,
-            vexpand = true,
-            xalign = 0
+        var header_label = new Granite.HeaderLabel (page.title) {
+            ellipsize = END,
+            mnemonic_widget = this,
+            size = H3,
+            valign = CENTER,
+            vexpand = true
         };
-        title_label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
 
         status_icon = new Gtk.Image () {
             halign = Gtk.Align.END,
             valign = Gtk.Align.END
         };
-
-        status_label = new Gtk.Label (null) {
-            use_markup = true,
-            ellipsize = Pango.EllipsizeMode.END,
-            vexpand = true,
-            xalign = 0,
-            visible = false
-        };
-        status_label.add_css_class (Granite.CssClass.SMALL);
 
         if (!page.with_avatar) {
             display_widget = new Gtk.Image () {
@@ -100,23 +72,23 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
             page.bind_property ("title", display_widget, "text", SYNC_CREATE);
         }
 
-        var overlay = new Gtk.Overlay ();
-        overlay.set_child (display_widget);
+        var overlay = new Gtk.Overlay () {
+            child = display_widget
+        };
         overlay.add_overlay (status_icon);
 
-        var grid = new Gtk.Grid ();
-        grid.attach (overlay, 0, 0, 1, 2);
-        grid.attach (title_label, 1, 0);
-        grid.attach (status_label, 1, 1);
+        var box = new Granite.Box (HORIZONTAL, HALF);
+        box.append (overlay);
+        box.append (header_label);
 
         accessible_role = TAB;
-        child = grid;
+        child = box;
 
         header = page.header;
         page.bind_property ("icon", this, "icon", BindingFlags.DEFAULT);
-        page.bind_property ("status", this, "status", BindingFlags.DEFAULT);
+        page.bind_property ("status", header_label, "secondary-text", BindingFlags.DEFAULT);
         page.bind_property ("status-type", this, "status-type", BindingFlags.DEFAULT);
-        page.bind_property ("title", this, "title", BindingFlags.DEFAULT);
+        page.bind_property ("title", header_label, "label", BindingFlags.DEFAULT);
 
         if (page.status != null) {
             status = page.status;

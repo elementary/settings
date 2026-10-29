@@ -36,8 +36,8 @@ public class Switchboard.SearchView : Gtk.Box {
         listbox = new Gtk.ListBox () {
             selection_mode = BROWSE
         };
-        listbox.add_css_class (Granite.STYLE_CLASS_BACKGROUND);
-        listbox.add_css_class (Granite.STYLE_CLASS_RICH_LIST);
+        // listbox.add_css_class (Granite.STYLE_CLASS_BACKGROUND);
+        // listbox.add_css_class (Granite.STYLE_CLASS_RICH_LIST);
         listbox.set_filter_func (filter_func);
         listbox.set_sort_func (sort_func);
         listbox.set_placeholder (alert_view);
