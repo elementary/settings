@@ -26,16 +26,11 @@ public class Switchboard.SearchView : Granite.Bin {
             return _query;
         }
         set {
-            Gtk.FilterChange filter_change = DIFFERENT;
-            if (value.has_prefix (query)) {
-                filter_change = MORE_STRICT;
-            }
-
             _query = value;
 
-            alert_view.title = _("No Results for “%s”").printf (query);
+            alert_view.title = _("No Results for “%s”").printf (value);
 
-            filter_model.filter.changed (filter_change);
+            ((Gtk.StringFilter) filter_model.filter).search = value;
             listbox.invalidate_sort ();
             listbox.select_row (null);
         }
@@ -50,7 +45,13 @@ public class Switchboard.SearchView : Granite.Bin {
     construct {
         list_store = new ListStore (typeof (SearchRow));
 
-        filter_model = new Gtk.FilterListModel (list_store, new Gtk.CustomFilter (filter_func)) {
+        filter_model = new Gtk.FilterListModel (
+            list_store,
+            new Gtk.StringFilter (new Gtk.PropertyExpression (typeof (SearchRow), null, "last-item")) {
+                ignore_case = true,
+                match_mode = SUBSTRING
+            }
+        ) {
             incremental = true
         };
 
@@ -86,19 +87,6 @@ public class Switchboard.SearchView : Granite.Bin {
 
     public void activate_first_item () {
         listbox.get_row_at_y (0).activate ();
-    }
-
-    private bool filter_func (Object object) {
-        if (query == "" || query == null) {
-            return true;
-        }
-
-        bool valid = query.match_string (((SearchRow) object).last_item, true);
-        if (valid) {
-            ((SearchRow) object).pattern = query;
-        }
-
-        return valid;
     }
 
     private int sort_func (Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
