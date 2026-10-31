@@ -56,14 +56,13 @@ public class Switchboard.CategoryView : Adw.NavigationPage {
         plug_search = new PlugsSearch ();
         plug_search_result = new Gee.ArrayList<SearchEntry?> ();
 
-        var category_box = new Gtk.Box (VERTICAL, 0) {
+        var category_box = new Granite.Box (VERTICAL, DOUBLE) {
             vexpand = true
         };
         category_box.append (personal_category);
         category_box.append (hardware_category);
         category_box.append (network_category);
         category_box.append (system_category);
-        category_box.add_css_class ("category-box");
 
         stack = new Gtk.Stack () {
             transition_type = CROSSFADE,
