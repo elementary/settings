@@ -118,37 +118,21 @@ public abstract class Switchboard.SettingsPage : Gtk.Widget {
             bind_property ("title", header_widget, "text");
         }
 
-        var title_label = new Gtk.Label (title) {
+        var title_label = new Granite.HeaderLabel ("") {
             hexpand = true,
-            wrap = true,
-            xalign = 0
-        };
-        title_label.add_css_class (Granite.STYLE_CLASS_H2_LABEL);
-
-        var description_label = new Gtk.Label (description) {
-            hexpand = true,
-            max_width_chars = 0,
-            selectable = true,
-            use_markup = true,
-            wrap = true,
-            xalign = 0
+            size = H2,
+            valign = CENTER
         };
 
-        var header_area = new Gtk.Grid ();
-        header_area.attach (title_label, 1, 0);
-
-        if (description != null) {
-            header_area.attach (header_widget, 0, 0, 1, 2);
-            header_area.attach (description_label, 1, 1, 2);
-        } else {
-            header_area.attach (header_widget, 0, 0);
-        }
+        var header_area = new Granite.Box (HORIZONTAL, HALF);
+        header_area.append (header_widget);
+        header_area.append (title_label);
 
         if (activatable) {
             status_switch = new Gtk.Switch () {
                 valign = Gtk.Align.START
             };
-            header_area.attach (status_switch, 2, 0);
+            header_area.append (status_switch);
         }
 
         var end_widget = new Gtk.WindowControls (END) {
@@ -196,17 +180,9 @@ public abstract class Switchboard.SettingsPage : Gtk.Widget {
         scrolled.set_parent (this);
         action_bar.set_parent (this);
 
-        bind_property ("description", description_label, "label");
-        bind_property ("title", title_label, "label");
+        bind_property ("description", title_label, "secondary-text", SYNC_CREATE);
+        bind_property ("title", title_label, "label", SYNC_CREATE);
         bind_property ("show-end-title-buttons", end_widget, "visible", SYNC_CREATE);
-
-        notify["description"].connect (() => {
-            if (description_label.parent == null) {
-                header_area.remove (header_widget);
-                header_area.attach (header_widget, 0, 0, 1, 2);
-                header_area.attach (description_label, 1, 1, 2);
-            }
-        });
     }
 
     ~SettingsPage () {

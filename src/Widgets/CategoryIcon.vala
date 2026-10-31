@@ -31,7 +31,7 @@ public class Switchboard.CategoryIcon : Gtk.FlowBoxChild {
 
     construct {
         var icon = new Gtk.Image.from_icon_name (plug.icon) {
-            pixel_size = 32,
+            icon_size = LARGE,
             tooltip_text = plug.description
         };
 
@@ -42,12 +42,7 @@ public class Switchboard.CategoryIcon : Gtk.FlowBoxChild {
             xalign = 0
         };
 
-        var layout = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6) {
-            margin_top = 6,
-            margin_end = 6,
-            margin_bottom = 6,
-            margin_start = 6
-        };
+        var layout = new Granite.Box (HORIZONTAL, HALF);
         layout.append (icon);
         layout.append (plug_name);
 
