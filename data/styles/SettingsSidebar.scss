@@ -9,6 +9,10 @@ settingssidebar {
         }
 
         row {
+            header {
+                margin: 0;
+            }
+
             overlay {
                 // IconSize.LARGE + padding
                 min-width: calc(32px + #{rem(6px)});
