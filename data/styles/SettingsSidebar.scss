@@ -3,7 +3,6 @@ settingssidebar {
         background: inherit;
         min-width: rem(200px);
 
-        row,
         > .title-4 {
             padding: rem(6px);
         }
@@ -17,6 +16,27 @@ settingssidebar {
                 // IconSize.LARGE + padding
                 min-width: calc(32px + #{rem(6px)});
             }
+
+            overlay:dir(ltr) {
+                margin-right: rem(6px);
+            }
+
+            overlay:dir(rtl) {
+                margin-left: rem(6px);
+            }
+        }
+    }
+
+    listview {
+        min-width: rem(200px);
+
+        header {
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+
+        row {
+            padding: 0;
 
             overlay:dir(ltr) {
                 margin-right: rem(6px);
