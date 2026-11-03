@@ -1,22 +1,26 @@
 /*
- * Copyright 2017-2022 elementary, Inc. (https://elementary.io)
+ * Copyright 2017-2026 elementary, Inc. (https://elementary.io)
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 /**
- * SettingsSidebar acts as a controller for a Gtk.Stack; it shows a row of buttons
- * to switch between the various pages of the associated stack widget.
+ * SettingsSidebar acts as a controller for a Gtk.SelectionModel; it shows a row of buttons
+ * to switch between the various pages of the associated model.
  *
  * All the content for the rows comes from the child properties of a Granite.SettingsPage
- * inside of the Gtk.Stack
+ * inside of the model
  */
 public class Switchboard.SettingsSidebar : Gtk.Widget {
-    private Gtk.ListBox listbox;
-
     /**
      * The Gtk.Stack to control
      */
-    public Gtk.Stack stack { get; construct; }
+    [Version (deprecated = true, deprecated_since = "9.0.0")]
+    public Gtk.Stack? stack { get; construct; default = null; }
+
+    /**
+     * The Gtk.SingleSelection to control
+     */
+    public Gtk.SingleSelection model { get; construct; }
 
     /**
      * Whether to show back and title buttons in the header area
@@ -26,39 +30,30 @@ public class Switchboard.SettingsSidebar : Gtk.Widget {
     /**
      * The name of the currently visible Granite.SettingsPage
      */
-    public string? visible_child_name {
-        get {
-            var selected_row = listbox.get_selected_row ();
-
-            if (selected_row == null) {
-                return null;
-            } else {
-                return ((SettingsSidebarRow) selected_row).page.title;
-            }
-        }
-        set {
-            weak Gtk.Widget listbox_child = listbox.get_first_child ();
-            while (listbox_child != null) {
-                if (!(listbox_child is SettingsSidebarRow)) {
-                    listbox_child = listbox_child.get_next_sibling ();
-                    continue;
-                }
-
-                if (((SettingsSidebarRow) listbox_child).page.title == value) {
-                    listbox.select_row ((Gtk.ListBoxRow) listbox_child);
-                    break;
-                }
-
-                listbox_child = listbox_child.get_next_sibling ();
-            }
-        }
-    }
+   [Version (deprecated = true, deprecated_since = "9.0.0")]
+    public string? visible_child_name { get; set; default = null; }
 
     /**
      * Create a new SettingsSidebar
      */
     public SettingsSidebar (Gtk.Stack stack) {
-        Object (stack: stack);
+        var selection_model = new Gtk.SingleSelection (stack.pages);
+        selection_model.notify["selected"].connect (() => {
+            stack.pages.select_item (selection_model.selected, true);
+        });
+
+        stack.pages.selection_changed.connect ((pos, n_items) => {
+            selection_model.selected = stack.pages.get_selection ().get_minimum ();
+        });
+
+        Object (
+            model: selection_model,
+            stack: stack
+        );
+    }
+
+    public SettingsSidebar.from_model (Gtk.SingleSelection selection_model) {
+        Object (model: selection_model);
     }
 
     static construct {
@@ -70,16 +65,19 @@ public class Switchboard.SettingsSidebar : Gtk.Widget {
     }
 
     construct {
-        listbox = new Gtk.ListBox () {
-            hexpand = true,
-            activate_on_single_click = true,
-            selection_mode = Gtk.SelectionMode.SINGLE
+        var factory = new Gtk.SignalListItemFactory ();
+        factory.bind.connect (bind_item);
+
+        var header_factory = new Gtk.SignalListItemFactory ();
+        header_factory.bind.connect (bind_header);
+
+        var listview = new Gtk.ListView (model, factory) {
+            header_factory = header_factory
         };
-        listbox.bind_model (stack.pages, create_widget_func);
 
         var scrolled = new Gtk.ScrolledWindow () {
             hscrollbar_policy = Gtk.PolicyType.NEVER,
-            child = listbox
+            child = listview
         };
 
         var headerbar = new Adw.HeaderBar () {
@@ -96,32 +94,6 @@ public class Switchboard.SettingsSidebar : Gtk.Widget {
 
         add_css_class (Granite.STYLE_CLASS_SIDEBAR);
 
-        listbox.row_selected.connect ((row) => {
-            if (row == null) {
-                return;
-            }
-
-            stack.visible_child = ((SettingsSidebarRow) row).page;
-        });
-
-        listbox.set_header_func ((row, before) => {
-            var header = ((SettingsSidebarRow) row).header;
-            if (header != null) {
-                if (before != null) {
-                    var before_header = ((SettingsSidebarRow) before).header;
-                    if (before_header != null && before_header == header) {
-                        return;
-                    }
-                }
-
-                var label = new Granite.HeaderLabel (header);
-
-                row.set_header (label);
-            }
-        });
-
-        stack.notify["visible-child"].connect (update_selection);
-
         bind_property ("show-title-buttons", toolbarview, "reveal-top-bars", SYNC_CREATE);
     }
 
@@ -129,23 +101,23 @@ public class Switchboard.SettingsSidebar : Gtk.Widget {
         get_first_child ().unparent ();
     }
 
-    private void update_selection () {
-        for (var child = listbox.get_first_child (); child != null; child = child.get_next_sibling ()) {
-            if (child is SettingsSidebarRow) {
-                var row = (SettingsSidebarRow) child;
-                if (row.page == stack.visible_child) {
-                    listbox.select_row ((Gtk.ListBoxRow) row);
-                    break;
-                }
-            }
-        }
+    private void bind_item (Object object) {
+        var list_item = (Gtk.ListItem) object;
+        //FIXME: check type of item in model;
+        unowned var stack_page = (Gtk.StackPage) list_item.item;
+        unowned var settings_page = (SettingsPage) stack_page.child;
+        list_item.child = new SettingsSidebarRow (settings_page);
     }
 
-    private Gtk.Widget create_widget_func (Object object) {
-        unowned var stack_page = (Gtk.StackPage) object;
-        unowned var page = (SettingsPage) stack_page.child;
-        var row = new SettingsSidebarRow (page);
+    private void bind_header (Object item) {
+        var list_item = (Gtk.ListHeader) item;
+        unowned var stack_page = (Gtk.StackPage) list_item.item;
+        unowned var settings_page = (SettingsPage) stack_page.child;
 
-        return row;
+        if (settings_page.header != null) {
+            ((Gtk.ListHeader) item).child = new Granite.HeaderLabel (settings_page.header);
+        } else {
+            ((Gtk.ListHeader) item).child = null;
+        }
     }
 }
