@@ -7,9 +7,15 @@ settingssidebar {
             padding: 0.5rem;
         }
 
-        row overlay {
-            // IconSize.LARGE + padding
-            min-width: calc(32px + 0.5rem);
+        row {
+            header {
+                margin: 0;
+            }
+
+            overlay {
+                // IconSize.LARGE + padding
+                min-width: calc(32px + 0.5rem);
+            }
         }
     }
 
