@@ -28,9 +28,6 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
 
     public unowned SettingsPage page { get; construct; }
 
-    public Icon icon { get; set; }
-    public string? header { get; set; }
-
     private Gtk.Widget display_widget;
     private Gtk.Image status_icon;
 
@@ -81,8 +78,6 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
         accessible_role = TAB;
         child = box;
 
-        header = page.header;
-        page.bind_property ("icon", this, "icon", BindingFlags.DEFAULT);
         page.bind_property ("status", header_label, "secondary-text", BindingFlags.DEFAULT);
         page.bind_property ("status-type", this, "status-type", BindingFlags.DEFAULT);
         page.bind_property ("title", header_label, "label", BindingFlags.DEFAULT);
