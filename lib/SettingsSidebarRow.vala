@@ -30,8 +30,6 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
 
     public Icon icon { get; set; }
     public string? header { get; set; }
-    public string? status { get; set; }
-    public string title { get; set; }
 
     private Gtk.Widget display_widget;
     private Gtk.Image status_icon;
@@ -88,10 +86,6 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
         page.bind_property ("status", header_label, "secondary-text", BindingFlags.DEFAULT);
         page.bind_property ("status-type", this, "status-type", BindingFlags.DEFAULT);
         page.bind_property ("title", header_label, "label", BindingFlags.DEFAULT);
-
-        if (page.status != null) {
-            status = page.status;
-        }
 
         if (page.status_type != SettingsPage.StatusType.NONE) {
             status_type = page.status_type;
