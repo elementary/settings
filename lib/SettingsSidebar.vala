@@ -105,10 +105,10 @@ public class Switchboard.SettingsSidebar : Gtk.Widget {
         });
 
         listbox.set_header_func ((row, before) => {
-            var header = ((SettingsSidebarRow) row).header;
+            var header = ((SettingsSidebarRow) row).page.header;
             if (header != null) {
                 if (before != null) {
-                    var before_header = ((SettingsSidebarRow) before).header;
+                    var before_header = ((SettingsSidebarRow) before).page.header;
                     if (before_header != null && before_header == header) {
                         return;
                     }

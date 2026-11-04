@@ -15,15 +15,7 @@ settingssidebar {
 
             overlay {
                 // IconSize.LARGE + padding
-                min-width: calc(32px + #{rem(6px)});
-            }
-
-            overlay:dir(ltr) {
-                margin-right: rem(6px);
-            }
-
-            overlay:dir(rtl) {
-                margin-left: rem(6px);
+                min-width: calc(32px + 0.5rem);
             }
         }
     }
