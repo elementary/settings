@@ -18,19 +18,43 @@
 */
 
 public class Switchboard.SearchView : Granite.Bin {
-    public Gtk.SearchEntry search_entry { get; construct; }
+    public signal void row_activated ();
+
+    private string _query = "";
+    public string query {
+        get {
+            return _query;
+        }
+        set {
+            Gtk.FilterChange filter_change = DIFFERENT;
+            if (value.has_prefix (query)) {
+                filter_change = MORE_STRICT;
+            }
+
+            _query = value;
+
+            alert_view.title = _("No Results for “%s”").printf (query);
+
+            filter_model.filter.changed (filter_change);
+            listbox.invalidate_sort ();
+            listbox.select_row (null);
+        }
+    }
+
+    private Granite.Placeholder alert_view;
     private Gtk.ListBox listbox;
+    private Gtk.FilterListModel filter_model;
 
     private ListStore list_store;
-
-    public SearchView (Gtk.SearchEntry search_entry) {
-        Object (search_entry: search_entry);
-    }
 
     construct {
         list_store = new ListStore (typeof (SearchRow));
 
-        var alert_view = new Granite.Placeholder ("") {
+        filter_model = new Gtk.FilterListModel (list_store, new Gtk.CustomFilter (filter_func)) {
+            incremental = true
+        };
+
+        alert_view = new Granite.Placeholder ("") {
             description = _("Try changing search terms."),
             icon = new ThemedIcon ("edit-find-symbolic")
         };
@@ -40,10 +64,9 @@ public class Switchboard.SearchView : Granite.Bin {
         listbox = new Gtk.ListBox () {
             selection_mode = BROWSE
         };
-        listbox.bind_model (list_store, (obj) => (SearchRow) obj);
+        listbox.bind_model (filter_model, (obj) => (SearchRow) obj);
         listbox.add_css_class (Granite.STYLE_CLASS_BACKGROUND);
         listbox.add_css_class (Granite.STYLE_CLASS_RICH_LIST);
-        listbox.set_filter_func (filter_func);
         listbox.set_sort_func (sort_func);
         listbox.set_placeholder (alert_view);
 
@@ -51,23 +74,13 @@ public class Switchboard.SearchView : Granite.Bin {
 
         load_plugs.begin ();
 
-        search_entry.search_changed.connect (() => {
-            alert_view.title = _("No Results for “%s”").printf (search_entry.text);
-
-            if (search_entry.text.length > 0) {
-                listbox.invalidate_filter ();
-                listbox.invalidate_sort ();
-                listbox.select_row (null);
-            }
-        });
-
         listbox.row_activated.connect ((row) => {
             app.load_setting_path (
                 ((SearchRow) row).uri.replace ("settings://", ""),
                 Switchboard.PlugsManager.get_default ()
             );
 
-            search_entry.text = "";
+            row_activated ();
         });
     }
 
@@ -75,22 +88,21 @@ public class Switchboard.SearchView : Granite.Bin {
         listbox.get_row_at_y (0).activate ();
     }
 
-    private bool filter_func (Gtk.ListBoxRow listbox_row) {
-        var search_text = search_entry.text;
-        if (search_text == "" || search_text == null) {
+    private bool filter_func (Object object) {
+        if (query == "" || query == null) {
             return true;
         }
 
-        bool valid = search_text.down () in ((SearchRow) listbox_row).last_item.down ();
+        bool valid = query.match_string (((SearchRow) object).last_item, true);
         if (valid) {
-            ((SearchRow) listbox_row).pattern = search_entry.text;
+            ((SearchRow) object).pattern = query;
         }
 
         return valid;
     }
 
     private int sort_func (Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
-        var search_text = search_entry.text.down ();
+        var search_text = query.down ();
         var row1_label = ((SearchRow) row1).last_item.down ();
         var row2_label = ((SearchRow) row2).last_item.down ();
 
