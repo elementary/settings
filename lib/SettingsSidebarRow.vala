@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
-private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
+private class Switchboard.SettingsSidebarRow : Granite.ListItem {
     public SettingsPage.StatusType status_type {
         set {
             switch (value) {
@@ -25,8 +25,6 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
             }
         }
     }
-
-    public string? header { get; set; }
 
     public unowned SettingsPage page { get; construct; }
 
@@ -112,7 +110,6 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
         accessible_role = TAB;
         child = grid;
 
-        header = page.header;
         page.bind_property ("icon", this, "icon", BindingFlags.DEFAULT);
         page.bind_property ("status", this, "status", BindingFlags.DEFAULT);
         page.bind_property ("status-type", this, "status-type", BindingFlags.DEFAULT);
