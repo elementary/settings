@@ -36,23 +36,8 @@ public class Switchboard.PlugsManager : GLib.Object {
 
     private PlugsManager () {
         plugs = new Gee.LinkedList<Switchboard.Plug> ();
-
-        string[] prefixes = {
-            "/usr",
-            "/usr/local"
-        };
-        string[] plugin_paths = {};
-        foreach (unowned string prefix in prefixes) {
-            var plugin_dir = Path.build_filename (prefix, Build.LIB_DIR, "switchboard-3") + "/";
-            if (FileUtils.test (plugin_dir, FileTest.EXISTS)) {
-                debug ("Found plugin directory: %s", plugin_dir);
-                plugin_paths += plugin_dir ;
-            }
-        }
-
-        foreach (unowned string path in plugin_paths) {
-            find_plugins (File.new_for_path (path));
-        }
+        var base_folder = File.new_for_path (Build.PLUGS_DIR);
+        find_plugins (base_folder);
     }
 
     private void load (string path) {
