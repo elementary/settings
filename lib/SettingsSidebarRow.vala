@@ -79,11 +79,7 @@ private class Switchboard.SettingsSidebarRow : Gtk.ListBoxRow {
         child = box;
 
         page.bind_property ("status", header_label, "secondary-text", BindingFlags.DEFAULT);
-        page.bind_property ("status-type", this, "status-type", BindingFlags.DEFAULT);
+        page.bind_property ("status-type", this, "status-type", SYNC_CREATE);
         page.bind_property ("title", header_label, "label", BindingFlags.DEFAULT);
-
-        if (page.status_type != SettingsPage.StatusType.NONE) {
-            status_type = page.status_type;
-        }
     }
 }
